@@ -1,0 +1,38 @@
+<div id="nav" class="col-12 col-md-4 col-lg-3 col-xl-2 pt-3 bg-light">
+	<nav class="sidebar card pt-2 mb-4">
+		<h6 class="mb-0 ps-2 pt-0 pb-2 py-1 py-1 border-bottom text-uppercase">Main Menu</h6>
+		<ul class="nav flex-column" id="nav_accordion">
+			<li class="nav-item border-bottom{% if is_current_url('index') %} active{% endif %}">
+				<a class="nav-link py-1" href="{{ url_for('index') }}">Home</a>
+			</li>
+			<li class="nav-item border-bottom">
+				<a class="nav-link py-1" data-bs-toggle="collapse" data-bs-target="#investmentsMenu" href="#">
+					Investments
+					<i class="bi small bi-caret-down-fill"></i>
+				</a>
+				<ul id="investmentsMenu" class="submenu{% if is_current_url('investments.settings') == false and is_current_url('investments.overview') == false %} collapse{% endif %} list-unstyled ps-2" data-bs-parent="#nav_accordion">
+					<li>
+						<a class="nav-link py-1{% if is_current_url('investments.overview') %} active{% endif %}" href="{{ url_for('investments.overview') }}">Overview</a>
+					</li>
+					<li>
+						<a class="nav-link py-1{% if is_current_url('investments.settings') %} active{% endif %}" href="{{ url_for('investments.settings') }}">Settings</a>
+					</li>
+				</ul>
+			</li>
+			<li class="nav-item border-bottom">
+				<a class="nav-link py-1" data-bs-toggle="collapse" data-bs-target="#recipesMenu" href="#">
+					Recipes
+					<i class="bi small bi-caret-down-fill"></i>
+				</a>
+				<ul id="recipesMenu" class="submenu{% if is_current_url('recipes.list', {'page': pages.current}) == false and is_current_url('recipes.list') == false and is_current_url('recipes.list.single', {'id': details.id}) == false and is_current_url('recipes.import') == false %} collapse{% endif %} list-unstyled ps-2" data-bs-parent="#nav_accordion">
+					<li>
+						<a class="nav-link py-1{% if is_current_url('recipes.import') %} active{% endif %}" href="{{ url_for('recipes.import') }}">Import</a>
+					</li>
+					<li>
+						<a class="nav-link py-1{% if is_current_url('recipes.list', {'page': pages.current}) or is_current_url('recipes.list') or is_current_url('recipes.list.single', {'id': details.id}) %} active{% endif %}" href="{{ url_for('recipes.list') }}">List</a>
+					</li>
+				</ul>
+			</li>
+		</ul>
+	</nav>
+</div>

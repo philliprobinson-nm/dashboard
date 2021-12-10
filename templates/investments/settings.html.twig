@@ -1,0 +1,182 @@
+{% extends '/layout.html.twig' %}
+
+{% block title %}Settings
+{% endblock %}
+
+{% block content %}
+	<div class="container-fluid">
+		<div class="row">
+			<div class="col">
+				<h3>Settings</h3>
+			</div>
+		</div>
+
+		<div class="card mt-3">
+			<div class="card-header">
+				<ul class="nav nav-tabs card-header-tabs">
+					<li class="nav-item">
+						<a class="nav-link active" href="#" data-bs-toggle="tab" data-bs-target="#symbols">Symbols</a>
+					</li>
+				</ul>
+			</div>
+			<div class="card-body">
+				<div class="tab-content">
+					<div class="tab-pane active" id="symbols">
+                        <div class="row">
+							<div class="col-lg-4">
+								<form id="symbolCreate">
+									<div class="row">
+										<div class="col">
+											<div class="form-floating">
+												<select class="form-select" id="tickerType" name="type">
+													<option selected disabled>Select a type</option>
+													<option value="Crypto">Crypto</option>
+													<option value="Stock">Stock</option>
+												</select>
+												<label for="tickerType">Type</label>
+											</div>
+										</div>
+									</div>
+									<div class="row mt-3">
+										<div class="col">
+											<div class="form-floating">
+												<input type="text" class="form-control" id="symbol" name="symbol" placeholder="AAPL">
+												<label for="symbol">Symbol</label>
+											</div>
+										</div>
+									</div>
+									<div class="row mt-3">
+										<div class="col">
+											<div class="form-floating">
+												<input type="text" class="form-control" id="name" name="name" readonly>
+												<label for="name">Name</label>
+											</div>
+										</div>
+									</div>
+									<div class="row mt-3">
+										<div class="col-6 d-grid">
+											<button id="getName" type="button" class="btn btn-sm btn-secondary">Get Name</button>
+										</div>
+										<div class="col-6 d-grid">
+											<button id="submit" type="button" class="btn btn-sm btn-primary">Submit</button>
+										</div>
+									</div>
+								</form>
+							</div>
+							<div class="col-lg-8 mt-3 mt-lg-0">
+								<div id="symbolsTable"></div>
+							</div>
+						</div>
+                    </div>
+				</div>
+			</div>
+		</div>
+
+	</div>
+{% endblock %}
+
+{% block js %}
+	<script type="text/javascript">
+		$(document).ready(function () {
+            var table = new Tabulator("#symbolsTable", {
+				pagination:"remote",
+				paginationSize:10,
+				paginationSizeSelector:true,
+				ajaxSorting:true,
+				initialSort:[
+					{column:"dateTime", dir:"desc"}, //sort by this first
+				],
+                minHeight: 256, // set height of table (in CSS or here), this enables the Virtual DOM and improves render speed dramatically (can be any valid css height value)
+				maxHeight: 512,
+                layout:"fitDataStretch", //fit columns to width of table (optional)
+                ajaxURL:'{{ url_for("investments.symbols.list") }}', //assign data to table
+                columns:[ //Define Table Columns
+                    {title:"Type", field:"type"},
+                    {title:"Symbol", field:"symbol"},
+                    {title:"Name", field:"name"},
+                    {title:"Datetime", field:"dateTime", sorter:"date"},
+                ],
+                /*rowClick:function(e, row){ //trigger an alert message when the row is clicked
+                    alert("Row " + row.getData().id + " Clicked!!!!");
+                },*/
+            });
+
+			$(document).on("click","#submit",function() {
+				$.ajax({
+					type: "POST",
+					url: '{{ url_for("investments.symbols.create") }}',
+					dataType:"json",
+					data: $("#symbolCreate").serialize(),
+					success: function(data){
+						if (data.status == "success") {
+							$("#symbolCreate").trigger("reset");
+
+							table.setData();
+
+							Toastify({
+								text: "success",
+								escapeMarkup: false,
+								duration: 3000,
+								"style.background": "none",
+								className: "bg-success bg-gradient",
+								stopOnFocus: true, // Prevents dismissing of toast on hover
+							}).showToast();
+						} else {
+							Toastify({
+								text: 'error: '+data.message,
+								escapeMarkup: false,
+								duration: 3000,
+								"style.background": "none",
+								className: "bg-danger bg-gradient",
+								stopOnFocus: true, // Prevents dismissing of toast on hover
+							}).showToast();
+						}
+					}
+				});
+			});
+
+			$(document).on("click","#getName",function() {
+				$.getJSON("{{ url_for('investments.stock.overview') }}?symbol="+$("#symbol").val()+"&tickerType="+$("#tickerType").val(), function(res) {
+					if (res.status == "success") {
+						if (!$.isEmptyObject(res.data)) {
+							if ($("#tickerType").val() == "Crypto") {
+								$("#symbol").val(res.data.symbol);
+								$("#name").val(res.data.name);
+							} else if ($("#tickerType").val() == "Stock") {
+								$("#symbol").val(res.data.Symbol);
+								$("#name").val(res.data.Name);
+							}
+
+							Toastify({
+								text: "success",
+								escapeMarkup: false,
+								duration: 3000,
+								"style.background": "none",
+								className: "bg-success bg-gradient",
+								stopOnFocus: true, // Prevents dismissing of toast on hover
+							}).showToast();
+						} else {
+							Toastify({
+								text: "warning: nothing found",
+								escapeMarkup: false,
+								duration: 3000,
+								"style.background": "none",
+								className: "bg-warning bg-gradient",
+								stopOnFocus: true, // Prevents dismissing of toast on hover
+							}).showToast();
+						}
+					} else if (res.status == "fail") {
+						Toastify({
+							text: 'error: '+res.message,
+							escapeMarkup: false,
+							duration: 3000,
+							"style.background": "none",
+							className: "bg-danger bg-gradient",
+							stopOnFocus: true, // Prevents dismissing of toast on hover
+						}).showToast();
+					}
+				});
+			});
+        });
+	</script>
+{% endblock %}

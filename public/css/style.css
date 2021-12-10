@@ -1,0 +1,31 @@
+.submenu {
+    background-color: #ffdb00;
+}
+
+.submenu .nav-link {
+    background-color: white;
+}
+
+.nav-link:hover {
+    background-color: #41ad49;
+    color: white;
+}
+
+#nav .active {
+    font-weight: bold;
+}
+
+.ui-autocomplete {
+    max-height: 250px;
+    overflow-y: auto;
+    /* prevent horizontal scrollbar */
+    overflow-x: hidden;
+}
+
+.toastify ul {
+    margin-bottom: 0px;
+}
+
+.toastify code {
+    color: yellow;
+}

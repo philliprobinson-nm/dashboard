@@ -1,0 +1,50 @@
+{% extends '/layout.html.twig' %}
+
+{% block title %}Settings
+{% endblock %}
+
+{% block content %}
+	<div class="container-fluid">
+		<div class="row">
+			<div class="col">
+				<h3>Overview</h3>
+			</div>
+		</div>
+
+		<div class="card mt-3">
+			<div class="card-body">
+				<div id="overviewTable"></div>
+			</div>
+		</div>
+
+	</div>
+{% endblock %}
+
+{% block js %}
+	<script type="text/javascript">
+		$(document).ready(function () {
+            var table = new Tabulator("#overviewTable", {
+				pagination:"remote",
+				paginationSize:10,
+				paginationSizeSelector:true,
+				ajaxSorting:true,
+				initialSort:[
+					{column:"dateTime", dir:"desc"}, //sort by this first
+				],
+                minHeight: 256, // set height of table (in CSS or here), this enables the Virtual DOM and improves render speed dramatically (can be any valid css height value)
+				maxHeight: 512,
+                layout:"fitDataStretch", //fit columns to width of table (optional)
+                ajaxURL:'{{ url_for("investments.symbols.list") }}', //assign data to table
+                columns:[ //Define Table Columns
+                    {title:"Type", field:"type"},
+                    {title:"Symbol", field:"symbol"},
+                    {title:"Name", field:"name"},
+                    {title:"Datetime", field:"dateTime", sorter:"date"},
+                ],
+                /*rowClick:function(e, row){ //trigger an alert message when the row is clicked
+                    alert("Row " + row.getData().id + " Clicked!!!!");
+                },*/
+            });
+        });
+	</script>
+{% endblock %}

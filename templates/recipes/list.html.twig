@@ -1,0 +1,61 @@
+{% extends '/layout.html.twig' %}
+
+{% block title %}Recipes{% endblock %}
+
+{% block content %}
+    <div class="container">
+        {% if pages.total > 1 %}
+        <div class="row mt-3">
+            <div class="col-2">
+                <ul class="pagination">
+                    <li class="page-item">
+                        <a class="page-link{% if pages.current == 1 %} disabled{% endif %}" {% if pages.current > 1 %}href="{{ url_for('recipes.list', {'page': pages.current - 1}) }}"{% endif %}><i class="las la-angle-left"></i></a>
+                    </li>
+                </ul>
+            </div>
+            <div class="col-8">
+                <form class="col-12 col-lg-auto mb-3 mb-lg-0 me-lg-3">
+                    <input id="search" type="search" class="form-control form-control-dark" placeholder="Search..." aria-label="Search">
+                </form>
+            </div>
+            <div class="col-2">
+                <ul class="pagination justify-content-end">
+                    <li class="page-item">
+                        <a class="page-link{% if pages.current >= pages.total %} disabled{% endif %}" {% if pages.current < pages.total %}href="{{ url_for('recipes.list', {'page': pages.current + 1}) }}"{% endif %}><i class="las la-angle-right"></i></a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        {% endif %}
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-3">
+            {% for row in rows %}
+                <div class="col">
+                    <div class="card shadow-sm">
+                        <a href="{{ url_for('recipes.list.single', {'id': row.id}) }}"><img class="card-img-top" src="{{ row.photo }}" alt="{{ row.title }}"></a>
+
+                        <div class="card-body">
+                            <h6 class="card-title mb-0 text-truncate"><a href="{{ url_for('recipes.list.single', {'id': row.id}) }}" class="text-decoration-none">{{ row.title|e }}</a></h6>
+                            <h7 class="card-subtitle mb-2 text-muted text-truncate d-block">{{ row.side_title|e }}</h7>
+                            <p class="card-text"></p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <!--<div class="btn-group">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary">View</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary">Edit</button>
+                                </div> -->
+                            </div>
+
+                            <div class="text-end"><i class="las la-stopwatch"></i><small class="text-muted">{{ row.total_time|e }}</small></div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}
+
+{% block js %}
+    <script type="text/javascript">
+        $(document).ready(function() {
+        });
+    </script>
+{% endblock %}

@@ -1,0 +1,101 @@
+{% extends '/layout.html.twig' %}
+
+{% block title %}Import{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <form id="eMeals">
+            <div class="mb-3">
+                <label for="url" class="form-label">URL</label>
+                <input type="text" class="form-control" id="url" name="url">
+            </div>
+            
+            <div class="row">
+                <div class="col-3">
+                    <button type="submit" id="submit" class="btn btn-primary">Submit</button>
+                </div>
+                <div class="col-9 mt-2">
+                    <progress value="10" max="10" id="pageBeginCountdown" style="width: 100%;"></progress>
+                </div>
+            </div>
+        </form>
+
+        <div class="col mt-4">
+            <ul id="status" class="list-unstyled" style="font-family:monospace;max-height: 256px; overflow-y: auto;">
+            </ul>
+        </div>
+    </div>
+{% endblock %}
+
+{% block js %}
+    <script type="text/javascript">
+        $(document).ready(function() {
+            function randomInt(min, max) { // min and max included 
+                return Math.floor(Math.random() * (max - min + 1) + min);
+            };
+
+            function submitForm() {
+                $("#submit").click();
+            };
+
+            function ProgressCountdown(timeleft, bar) {
+                return new Promise((resolve, reject) => {
+                var countdownTimer = setInterval(() => {
+                    timeleft--;
+
+                    document.getElementById(bar).value = timeleft;
+
+                    if (timeleft <= 0) {
+                    clearInterval(countdownTimer);
+                    resolve(true);
+                    }
+                }, 1000);
+                });
+            }
+
+            $("#eMeals").submit(function(e) {
+                // prevent default behaviour
+                e.preventDefault();
+
+                let form = $(this);
+
+                $.ajax({
+                    type: "POST",
+                    url: '{{ url_for('recipes.import.form') }}',
+                    data: form.serialize(), // serializes the form's elements.
+                    datatype: 'json',
+                    success: function(data) {
+                        console.log(data);
+                        let randomNum = randomInt(5, 15);
+                        let date = new Date(Date.now()).toLocaleString().replace(",", "");
+
+                        if (data.status != "success") {
+                            if (data.message.includes("duplicate")) {
+                                $("#status").prepend('<li class="bg-warning bg-gradient border-bottom">[<span class="small">'+date+'</span>]: '+data.planId+'-'+data.recipeId+' '+data.message+'</li>');
+
+                                let recipeId = parseInt(data.recipeId)+1
+                                $("#url").val("https://emeals.com/recipes/recipe-"+data.planId+"-"+recipeId);
+                                
+                                $("#submit").click();
+                            } else {
+                                $("#status").prepend('<li class="bg-danger bg-gradient border-bottom text-white">[<span class="small">'+date+'</span>]: '+data.planId+'-'+data.recipeId+' '+data.message+'</li>');
+                            }
+                        } else {
+                            $("#status").prepend('<li class="bg-success bg-gradient border-bottom">[<span class="small">'+date+'</span>]: '+data.planId+'-'+data.recipeId+' '+data.title+' '+data.message+'</li>');
+
+                            let recipeId = parseInt(data.recipeId)+1
+                            $("#url").val("https://emeals.com/recipes/recipe-"+data.planId+"-"+recipeId);
+
+                            $("#status").prepend('<li class="bg-info bg-gradient border-bottom text-white">[<span class="small">'+date+'</span>]: Waiting '+randomNum+" seconds to continue</li>");
+                            document.getElementById("pageBeginCountdown").value = randomNum;
+                            document.getElementById("pageBeginCountdown").max = randomNum;
+                            
+                            ProgressCountdown(randomNum, 'pageBeginCountdown', 'pageBeginCountdownText');
+                            window.setTimeout( submitForm,  randomNum*1000);
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+{% endblock %}
